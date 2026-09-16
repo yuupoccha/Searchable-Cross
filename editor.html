@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>クロスワード問題作成エディタ</title>
+    <style>
+        body {
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            background-color: #fcfcfc;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        header {
+            padding: 15px 20px;
+            text-align: center;
+            border-bottom: 2px solid #eee;
+            background-color: #fff;
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        main {
+            max-width: 900px;
+            margin: 0 auto 40px;
+            padding: 0 20px;
+        }
+
+        .editor-grid-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        @media (max-width: 768px) {
+            .editor-grid-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 18px;
+        }
+
+        .panel-title {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 12px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 4px;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="text"], input[type="number"], select {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .tool-bar {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+            background: #f1f5f9;
+            padding: 6px;
+            border-radius: 6px;
+        }
+
+        .tool-btn {
+            flex: 1;
+            padding: 8px 4px;
+            border: 1px solid #cbd5e1;
+            background-color: #fff;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.15s ease;
+        }
+
+        .tool-btn.active {
+            background-color: #2563eb;
+            color: #fff;
+            border-color: #2563eb;
+        }
+
+        .board-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .editor-board {
+            display: grid;
+            gap: 2px;
+            background-color: #333;
+            border: 2px solid #333;
+            padding: 2px;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .cell {
+            width: 50px;
+            height: 50px;
+            background-color: #fff;
+            position: relative;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+        .cell.black { background-color: #333; }
+        .cell.double {
+            outline: 3px double #d97706;
+            outline-offset: -4px;
+            background-color: #fffbeb;
+        }
+
+        .cell.selected {
+            box-shadow: inset 0 0 0 3px #0284c7;
+            z-index: 5;
+        }
+
+        .cell-num {
+            position: absolute;
+            top: 2px;
+            left: 3px;
+            font-size: 10px;
+            color: #666;
+            pointer-events: none;
+        }
+
+        .cell-char {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1e293b;
+            pointer-events: none;
+        }
+
+        .hint-item {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 6px;
+            align-items: center;
+        }
+
+        .hint-item input[type="number"] { width: 50px; }
+        .hint-item input[type="text"] { flex: 1; }
+
+        .btn {
+            background-color: #333;
+            color: #fff;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .btn:hover { background-color: #555; }
+        .btn-sub { background-color: #64748b; }
+        .btn-danger { background-color: #ef4444; }
+
+        textarea {
+            width: 100%;
+            height: 240px;
+            font-family: monospace;
+            font-size: 12px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            background-color: #f8fafc;
+            white-space: pre;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>クロスワード問題作成エディタ</h1>
+    </header>
+
+    <main>
+        <div class="editor-grid-layout">
+            <!-- 左パネル: 基本設定 & 盤面操作 -->
+            <div class="panel">
+                <div class="panel-title">1. 基本情報・盤面サイズ</div>
+                <div class="form-row">
+                    <div class="form-group" style="flex: 1;">
+                        <label>問題ID</label>
+                        <input type="text" id="q-id" value="q5">
+                    </div>
+                    <div class="form-group" style="flex: 2;">
+                        <label>タイトル</label>
+                        <input type="text" id="q-title" value="新しい問題">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group" style="flex: 1;">
+                        <label>難易度 (1~6)</label>
+                        <input type="number" id="q-diff" min="1" max="6" value="1">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>行数 (Rows)</label>
+                        <input type="number" id="q-rows" min="2" max="10" value="3">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>列数 (Cols)</label>
+                        <input type="number" id="q-cols" min="2" max="10" value="3">
+                    </div>
+                </div>
+                <button class="btn btn-sub" onclick="resetGrid()">盤面サイズを適用</button>
+
+                <div class="panel-title" style="margin-top: 20px;">2. 盤面編集</div>
+                
+                <div class="tool-bar">
+                    <button class="tool-btn active" id="tool-select" onclick="setTool('select')">✎ 文字/選択</button>
+                    <button class="tool-btn" id="tool-black" onclick="setTool('black')">■ 黒マス切替</button>
+                    <button class="tool-btn" id="tool-double" onclick="setTool('double')">🔲 二重線切替</button>
+                </div>
+
+                <div class="board-wrapper">
+                    <div id="editor-board" class="editor-board"></div>
+                </div>
+
+                <div id="cell-inspector" style="background: #f1f5f9; padding: 12px; border-radius: 6px; display: none;">
+                    <div style="font-weight: bold; font-size: 13px; margin-bottom: 8px;">マス設定 (<span id="selected-pos"></span>)</div>
+                    <div class="form-row">
+                        <div class="form-group" style="flex: 1;">
+                            <label>テスト用文字</label>
+                            <input type="text" id="cell-char" maxlength="1" placeholder="例: ア" autocomplete="off">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>マス番号 (手動設定)</label>
+                            <input type="number" id="cell-num" placeholder="例: 1" oninput="updateSelectedCell()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右パネル: ヒント & 最終解答設定 -->
+            <div class="panel">
+                <div class="panel-title">3. カギと答えの設定</div>
+                
+                <div class="form-group">
+                    <label>最終回答 (二重線マスの答え)</label>
+                    <input type="text" id="q-final" placeholder="例: アキ" autocomplete="off">
+                </div>
+
+                <div style="margin-top: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <label style="font-weight: bold; font-size: 13px;">ヨコのカギ</label>
+                        <button class="btn btn-sub" onclick="addHint('across')" style="padding: 2px 8px; font-size: 11px;">+ 追加</button>
+                    </div>
+                    <div id="hints-across-list"></div>
+                </div>
+
+                <div style="margin-top: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <label style="font-weight: bold; font-size: 13px;">タテのカギ</label>
+                        <button class="btn btn-sub" onclick="addHint('down')" style="padding: 2px 8px; font-size: 11px;">+ 追加</button>
+                    </div>
+                    <div id="hints-down-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- コード出力エリア -->
+        <div class="panel">
+            <div class="panel-title">4. 生成コード (`questions.html` の `questionsData` に貼り付け)</div>
+            <button class="btn" onclick="generateCode()" style="margin-bottom: 10px;">JavaScriptコードを生成</button>
+            <button class="btn btn-sub" onclick="copyCode()" style="margin-bottom: 10px; margin-left: 5px;">コピー</button>
+            <textarea id="output-code" readonly placeholder="「JavaScriptコードを生成」を押すとここにコードが出力されます"></textarea>
+        </div>
+    </main>
+
+    <script>
+        let rows = 3;
+        let cols = 3;
+        let gridData = [];
+        let selectedRow = null;
+        let selectedCol = null;
+        let currentTool = 'select';
+
+        let hintsData = {
+            across: [{ num: 1, text: '' }],
+            down: [{ num: 1, text: '' }]
+        };
+
+        function filterToKatakanaOnly(text) {
+            let converted = text.replace(/[\u3041-\u3096]/g, ch => String.fromCharCode(ch.charCodeAt(0) + 0x60));
+            const smallKatakanaMap = {
+                'ァ': 'ア', 'ィ': 'イ', 'ゥ': 'ウ', 'ェ': 'エ', 'ォ': 'オ',
+                'ッ': 'ツ', 'ャ': 'ヤ', 'ュ': 'ユ', 'ョ': 'ヨ', 'ヮ': 'ワ',
+                'ヵ': 'カ', 'ヶ': 'ケ'
+            };
+            converted = converted.replace(/[ァィゥェォッャュョヮヵヶ]/g, ch => smallKatakanaMap[ch] || ch);
+            return converted.replace(/[^\u30a1-\u30fc]/g, '');
+        }
+
+        function setupKatakanaFilter(inputEl, onComplete) {
+            let isComposing = false;
+            inputEl.addEventListener('compositionstart', () => { isComposing = true; });
+            inputEl.addEventListener('compositionend', () => {
+                isComposing = false;
+                inputEl.value = filterToKatakanaOnly(inputEl.value);
+                if (onComplete) onComplete();
+            });
+            inputEl.addEventListener('input', () => {
+                if (!isComposing) {
+                    inputEl.value = filterToKatakanaOnly(inputEl.value);
+                    if (onComplete) onComplete();
+                }
+            });
+        }
+
+        function initGridData() {
+            gridData = [];
+            for (let r = 0; r < rows; r++) {
+                const row = [];
+                for (let c = 0; c < cols; c++) {
+                    row.push({ type: 'letter', char: '', num: null, double: false });
+                }
+                gridData.push(row);
+            }
+        }
+
+        function setTool(tool) {
+            currentTool = tool;
+            document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`tool-${tool}`).classList.add('active');
+        }
+
+        function resetGrid() {
+            rows = parseInt(document.getElementById('q-rows').value);
+            cols = parseInt(document.getElementById('q-cols').value);
+            initGridData();
+            selectedRow = null;
+            selectedCol = null;
+            document.getElementById('cell-inspector').style.display = 'none';
+            renderBoard();
+        }
+
+        function renderBoard() {
+            const board = document.getElementById('editor-board');
+            board.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+            board.innerHTML = '';
+
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    const cell = gridData[r][c];
+                    const cellEl = document.createElement('div');
+                    cellEl.className = 'cell';
+
+                    if (cell.type === 'black') {
+                        cellEl.classList.add('black');
+                    } else if (cell.double) {
+                        cellEl.classList.add('double');
+                    }
+
+                    if (selectedRow === r && selectedCol === c) {
+                        cellEl.classList.add('selected');
+                    }
+
+                    if (cell.type !== 'black') {
+                        if (cell.num) {
+                            const numEl = document.createElement('span');
+                            numEl.className = 'cell-num';
+                            numEl.textContent = cell.num;
+                            cellEl.appendChild(numEl);
+                        }
+                        if (cell.char) {
+                            const charEl = document.createElement('span');
+                            charEl.className = 'cell-char';
+                            charEl.textContent = cell.char;
+                            cellEl.appendChild(charEl);
+                        }
+                    }
+
+                    cellEl.onclick = () => handleCellClick(r, c);
+                    board.appendChild(cellEl);
+                }
+            }
+        }
+
+        function handleCellClick(r, c) {
+            selectedRow = r;
+            selectedCol = c;
+            const cell = gridData[r][c];
+
+            if (currentTool === 'black') {
+                if (cell.type === 'black') {
+                    cell.type = 'letter';
+                } else {
+                    cell.type = 'black';
+                    cell.double = false;
+                    cell.char = '';
+                    cell.num = null;
+                }
+            } else if (currentTool === 'double') {
+                if (cell.type === 'black') {
+                    cell.type = 'letter';
+                    cell.double = true;
+                } else {
+                    cell.double = !cell.double;
+                }
+            }
+
+            updateInspector();
+            renderBoard();
+
+            if (currentTool === 'select' && cell.type !== 'black') {
+                const charInput = document.getElementById('cell-char');
+                charInput.focus();
+                charInput.select();
+            }
+        }
+
+        function updateInspector() {
+            if (selectedRow === null || selectedCol === null) return;
+            const cell = gridData[selectedRow][selectedCol];
+
+            if (cell.type === 'black') {
+                document.getElementById('cell-inspector').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('cell-inspector').style.display = 'block';
+            document.getElementById('selected-pos').textContent = `${selectedRow + 1}行目, ${selectedCol + 1}列目`;
+            document.getElementById('cell-char').value = cell.char || '';
+            document.getElementById('cell-num').value = cell.num || '';
+        }
+
+        function updateSelectedCell() {
+            if (selectedRow === null || selectedCol === null) return;
+            const cell = gridData[selectedRow][selectedCol];
+
+            cell.char = filterToKatakanaOnly(document.getElementById('cell-char').value.trim());
+            cell.num = parseInt(document.getElementById('cell-num').value) || null;
+
+            renderBoard();
+        }
+
+        function renderHints() {
+            const renderList = (type) => {
+                const listEl = document.getElementById(`hints-${type}-list`);
+                listEl.innerHTML = '';
+                hintsData[type].forEach((h, idx) => {
+                    const div = document.createElement('div');
+                    div.className = 'hint-item';
+                    div.innerHTML = `
+                        <input type="number" value="${h.num}" placeholder="No" onchange="hintsData['${type}'][${idx}].num = parseInt(this.value)">
+                        <input type="text" value="${h.text}" placeholder="ヒントテキスト" oninput="hintsData['${type}'][${idx}].text = this.value">
+                        <button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="removeHint('${type}', ${idx})">削除</button>
+                    `;
+                    listEl.appendChild(div);
+                });
+            };
+            renderList('across');
+            renderList('down');
+        }
+
+        function addHint(type) {
+            const nextNum = hintsData[type].length + 1;
+            hintsData[type].push({ num: nextNum, text: '' });
+            renderHints();
+        }
+
+        function removeHint(type, idx) {
+            hintsData[type].splice(idx, 1);
+            renderHints();
+        }
+
+        function buildGridWithAutoHints() {
+            const calculatedGrid = JSON.parse(JSON.stringify(gridData));
+
+            for (let r = 0; r < rows; r++) {
+                let currentAcrossNum = null;
+                for (let c = 0; c < cols; c++) {
+                    const cell = calculatedGrid[r][c];
+                    if (cell.type === 'black') {
+                        currentAcrossNum = null;
+                        continue;
+                    }
+                    const isStart = (c === 0 || calculatedGrid[r][c - 1].type === 'black') && 
+                                    (c + 1 < cols && calculatedGrid[r][c + 1].type !== 'black');
+                    if (isStart) currentAcrossNum = cell.num;
+                    if (currentAcrossNum) cell.across = currentAcrossNum;
+                }
+            }
+
+            for (let c = 0; c < cols; c++) {
+                let currentDownNum = null;
+                for (let r = 0; r < rows; r++) {
+                    const cell = calculatedGrid[r][c];
+                    if (cell.type === 'black') {
+                        currentDownNum = null;
+                        continue;
+                    }
+                    const isStart = (r === 0 || calculatedGrid[r - 1][c].type === 'black') && 
+                                    (r + 1 < rows && calculatedGrid[r + 1][c].type !== 'black');
+                    if (isStart) currentDownNum = cell.num;
+                    if (currentDownNum) cell.down = currentDownNum;
+                }
+            }
+
+            return calculatedGrid;
+        }
+
+        function generateCode() {
+            const today = new Date().toISOString().split('T')[0];
+            const autoGrid = buildGridWithAutoHints();
+
+            const id = document.getElementById('q-id').value.trim();
+            const title = document.getElementById('q-title').value.trim();
+            const diffLevel = parseInt(document.getElementById('q-diff').value) || 1;
+            const finalAnswer = filterToKatakanaOnly(document.getElementById('q-final').value.trim());
+
+            // gridを各行1行の文字列に変換
+            const gridRowsLines = autoGrid.map(row => {
+                const cells = row.map(cell => {
+                    if (cell.type === 'black') return "{ type: 'black' }";
+                    const props = ["type: 'letter'"];
+                    if (cell.num) props.push(`num: ${cell.num}`);
+                    if (cell.double) props.push(`double: true`);
+                    if (cell.across) props.push(`across: ${cell.across}`);
+                    if (cell.down) props.push(`down: ${cell.down}`);
+                    return `{ ${props.join(', ')} }`;
+                });
+                return `                    [${cells.join(', ')}]`;
+            });
+
+            const gridString = `[\n${gridRowsLines.join(',\n')}\n                ]`;
+
+            // hintsの文字列変換
+            const formatHints = (list) => {
+                return list.map(h => `{ num: ${h.num}, text: "${h.text.replace(/"/g, '\\"')}" }`).join(', ');
+            };
+
+            const code = `            {
+                id: "${id}",
+                title: "${title}",
+                diffLevel: ${diffLevel},
+                createdAt: "${today}",
+                rows: ${rows}, cols: ${cols},
+                grid: ${gridString},
+                hints: {
+                    across: [${formatHints(hintsData.across)}],
+                    down: [${formatHints(hintsData.down)}]
+                },
+                finalAnswer: "${finalAnswer}"
+            }`;
+
+            document.getElementById('output-code').value = code;
+        }
+
+        function copyCode() {
+            const output = document.getElementById('output-code');
+            output.select();
+            document.execCommand('copy');
+            alert('コードをクリップボードにコピーしました！');
+        }
+
+        setupKatakanaFilter(document.getElementById('cell-char'), updateSelectedCell);
+        setupKatakanaFilter(document.getElementById('q-final'), () => {});
+
+        initGridData();
+        renderBoard();
+        renderHints();
+    </script>
+</body>
+</html>
