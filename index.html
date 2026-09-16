@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>検索可能クロスワード</title>
     <style>
-        /* AIっぽさを消し、シンプルで少し温かみのあるデザインに */
         body {
             font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
             background-color: #fcfcfc;
@@ -49,19 +48,47 @@
             display: inline-block;
         }
 
-        .play-button {
+        /* ボタン配置用の縦並びコンテナ */
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        /* 大きめの薄い黄緑ボタン */
+        .btn-main {
             display: inline-block;
-            background-color: #333;
-            color: #fff;
+            background-color: #d9f99d; /* 薄い黄緑 */
+            color: #275204; /* 視認性の良い濃いめの文字 */
             text-decoration: none;
-            padding: 15px 40px;
-            font-size: 18px;
+            padding: 16px 48px;
+            font-size: 20px;
+            font-weight: bold;
             border-radius: 30px;
             transition: background-color 0.2s ease;
         }
 
-        .play-button:hover {
-            background-color: #555;
+        .btn-main:hover {
+            background-color: #bef264;
+        }
+
+        /* 小さめで灰色のボタン */
+        .btn-sub {
+            display: inline-block;
+            background-color: #f1f5f9; /* 明るめの灰色 */
+            color: #64748b; /* 落ち着いた灰色の文字 */
+            border: 1px solid #cbd5e1;
+            text-decoration: none;
+            padding: 8px 20px;
+            font-size: 14px;
+            border-radius: 20px;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .btn-sub:hover {
+            background-color: #e2e8f0;
+            color: #334155;
         }
     </style>
 </head>
@@ -76,8 +103,10 @@
             クロスワード、ただし<span class="highlight">検索してもいい</span>
         </p>
 
-        <!-- ゲーム開始への導線など（必要に応じて変更してください） -->
-        <a href="game.html" class="play-button">遊んでみる</a>
+        <div class="button-group">
+            <a href="questions.html" class="btn-main">問題一覧へ</a>
+            <a href="whatis.html" class="btn-sub">検索可能クロスワードとは？</a>
+        </div>
     </main>
 
 </body>
