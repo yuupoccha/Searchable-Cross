@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ルール・遊び方 - クロスワード</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: #fff;
+            border-bottom: 1px solid #ddd;
+            padding: 15px 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        main {
+            max-width: 900px;
+            margin: 20px auto 40px;
+            padding: 0 15px;
+        }
+
+        .box {
+            background: #fff;
+            border: 1px solid #ccc;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 16px;
+            margin-top: 0;
+            margin-bottom: 12px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #333;
+        }
+
+        .notice-text {
+            background-color: #fff4f4;
+            border-left: 4px solid #d9534f;
+            padding: 10px 12px;
+            margin: 8px 0;
+            font-size: 14px;
+        }
+
+        .rule-note {
+            background-color: #f5f5f5;
+            padding: 10px 12px;
+            margin-top: 8px;
+            font-size: 14px;
+        }
+
+        /* 上段レイアウト: ステップ1 / ステップ2 / カギ */
+        .top-row {
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        @media (max-width: 768px) {
+            .top-row {
+                flex-direction: column;
+            }
+        }
+
+        .step-item {
+            background: #fdfdfd;
+            border: 1px solid #eee;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .step-title {
+            font-weight: bold;
+            font-size: 13px;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        /* 盤面 */
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 40px);
+            gap: 2px;
+            background-color: #333;
+            border: 2px solid #333;
+            margin: 0 auto;
+        }
+
+        .cell {
+            width: 40px;
+            height: 40px;
+            background-color: #fff;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+        .cell.black { background-color: #333; }
+        .cell.double {
+            outline: 2px double #c90;
+            outline-offset: -3px;
+            background-color: #fffdf0;
+        }
+
+        .cell-num {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            font-size: 9px;
+            color: #666;
+            line-height: 1;
+        }
+
+        .cell-char {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        /* カギ情報 */
+        .hints-wrapper {
+            flex: 1;
+            background: #fdfdfd;
+            border: 1px solid #eee;
+            padding: 12px;
+            font-size: 13px;
+        }
+
+        .hints-wrapper h3 {
+            margin: 0 0 8px 0;
+            font-size: 14px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 4px;
+        }
+
+        .hints-flex {
+            display: flex;
+            gap: 15px;
+        }
+
+        .hints-flex ul {
+            margin: 0;
+            padding-left: 18px;
+        }
+
+        .arrow {
+            text-align: center;
+            font-size: 18px;
+            margin: 15px 0;
+            color: #888;
+        }
+
+        /* 下段レイアウト: ステップ3 */
+        .bottom-row {
+            background: #fcfcfc;
+            border: 1px solid #ddd;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .final-answer {
+            text-align: center;
+            border: 1px solid #333;
+            padding: 10px 20px;
+            background: #fff;
+        }
+
+        .final-answer .label {
+            font-size: 12px;
+            color: #666;
+            display: block;
+        }
+
+        .final-answer .value {
+            font-size: 22px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        /* 戻るボタン */
+        .footer-action {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .btn-back {
+            display: inline-block;
+            background-color: #333;
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 24px;
+            font-size: 14px;
+            border-radius: 3px;
+        }
+
+        .btn-back:hover {
+            background-color: #555;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>ルール・遊び方</h1>
+    </header>
+
+    <main>
+        <!-- ルール -->
+        <div class="box">
+            <h2>基本ルール</h2>
+            <p style="margin-top: 0; font-size: 14px;">
+                一般的なクロスワードと同じように、タテ・ヨコのカギをヒントに盤面を埋めていきます。
+            </p>
+
+            <div class="notice-text">
+                <strong>※ Web検索前提の問題です</strong><br>
+                盤面に入る単語のほとんどは一般常識ではなく、マイナーな用語や専門知識です。検索せずに解くことは想定されていませんので、Googleなどで積極的に調べて解答してください。
+            </div>
+
+            <div class="rule-note">
+                ・<strong>濁点・半濁点：</strong>区別します（「ハ」「バ」「パ」は別文字）。<br>
+                ・<strong>大文字・小文字：</strong>区別しません（「ツ」と「ッ」は同じ扱い）。
+            </div>
+        </div>
+
+        <!-- 解答手順 -->
+        <div class="box">
+            <h2>流れ</h2>
+
+            <!-- 上段 -->
+            <div class="top-row">
+                <div class="step-item">
+                    <div class="step-title">ステップ1：空白の盤面</div>
+                    <div class="board">
+                        <div class="cell black"></div>
+                        <div class="cell double"><span class="cell-num">1</span></div>
+                        <div class="cell double"><span class="cell-num">2</span></div>
+
+                        <div class="cell double"><span class="cell-num">3</span></div>
+                        <div class="cell"></div>
+                        <div class="cell double"></div>
+
+                        <div class="cell double"><span class="cell-num">4</span></div>
+                        <div class="cell double"></div>
+                        <div class="cell black"></div>
+                    </div>
+                </div>
+
+                <div class="step-item">
+                    <div class="step-title">ステップ2：文字を埋める</div>
+                    <div class="board">
+                        <div class="cell black"></div>
+                        <div class="cell double"><span class="cell-num">1</span><span class="cell-char">ト</span></div>
+                        <div class="cell double"><span class="cell-num">2</span><span class="cell-char">リ</span></div>
+
+                        <div class="cell double"><span class="cell-num">3</span><span class="cell-char">ア</span></div>
+                        <div class="cell"><span class="cell-char">オ</span></div>
+                        <div class="cell double"><span class="cell-char">ナ</span></div>
+
+                        <div class="cell double"><span class="cell-num">4</span><span class="cell-char">イ</span></div>
+                        <div class="cell double"><span class="cell-char">ト</span></div>
+                        <div class="cell black"></div>
+                    </div>
+                </div>
+
+                <div class="hints-wrapper">
+                    <h3>例題のカギ</h3>
+                    <div class="hints-flex">
+                        <div>
+                            <strong>【ヨコ】</strong>
+                            <ul>
+                                <li>1: 『ツギハギスタッカート』</li>
+                                <li>3: 小さな家、粗末な家</li>
+                                <li>4: 確認したり、問い返したり</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <strong>【タテ】</strong>
+                            <ul>
+                                <li>1: 広く世間に知れわたっている名</li>
+                                <li>2: イロカノ語で「王」</li>
+                                <li>3: 謀反のくわだて</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <!-- 下段 -->
+            <div class="bottom-row">
+                <div style="text-align: center;">
+                    <div class="step-title">ステップ3：答えを抜き出す</div>
+                    <div class="board">
+                        <div class="cell black"></div>
+                        <div class="cell double"><span class="cell-num">1</span><span class="cell-char">ト</span></div>
+                        <div class="cell double"><span class="cell-num">2</span><span class="cell-char">リ</span></div>
+
+                        <div class="cell double"><span class="cell-num">3</span><span class="cell-char">ア</span></div>
+                        <div class="cell"><span class="cell-char" style="color: #ccc;">オ</span></div>
+                        <div class="cell double"><span class="cell-char">ナ</span></div>
+
+                        <div class="cell double"><span class="cell-num">4</span><span class="cell-char">イ</span></div>
+                        <div class="cell double"><span class="cell-char">ト</span></div>
+                        <div class="cell black"></div>
+                    </div>
+                </div>
+
+                <div class="final-answer">
+                    <span class="label">二重線マスの答え</span>
+                    <span class="value">トリアナイト</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- トップに戻るボタン -->
+        <div class="footer-action">
+            <a href="index.html" class="btn-back">トップページに戻る</a>
+        </div>
+    </main>
+
+</body>
+</html>
