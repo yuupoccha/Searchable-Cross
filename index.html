@@ -1,1 +1,304 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>検索可能クロスワード</title>
+    <style>
+        /* === 基本スタイル === */
+        :root {
+            --primary-color: #3b82f6;
+            --primary-hover: #1d4ed8;
+            --secondary-color: #10b981;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+        }
 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, 'ヒラギノ角ゴ Pro W3', 'Hiragino Kaku Gothic Pro', 'メイリオ', Meiryo, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* === ヘッダー / ナビゲーション === */
+        header {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .nav-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-color);
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-color);
+        }
+
+        /* === メインコンテンツ === */
+        main {
+            flex: 1;
+            max-width: 1000px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem;
+        }
+
+        /* ヒーローセクション */
+        .hero {
+            text-align: center;
+            padding: 3rem 1rem;
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            border-radius: 1rem;
+            margin-bottom: 2.5rem;
+            border: 1px solid #bfdbfe;
+        }
+
+        .hero h1 {
+            font-size: 2.2rem;
+            margin-bottom: 1rem;
+            color: #1e3a8a;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 1.8rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: #f1f5f9;
+        }
+
+        /* 特徴紹介カード */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .feature-card {
+            background-color: var(--card-bg);
+            padding: 1.8rem;
+            border-radius: 0.75rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .feature-card h3 {
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+            font-size: 1.2rem;
+        }
+
+        .feature-card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* === フッター === */
+        footer {
+            background-color: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            padding: 1.5rem;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        /* 隠しコマンド発動時のトースト表示 */
+        #secret-toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #1e293b;
+            color: #fff;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: none;
+            animation: fadeIn 0.3s forwards;
+            z-index: 1000;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(100px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ヘッダー -->
+    <header>
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                🧩 検索可能クロスワード
+            </a>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="help.html">サイト概要・使い方</a></li>
+                    <li><a href="questions.html">問題一覧</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main>
+        <section class="hero">
+            <h1>知識を試そう、言葉を解き明かそう</h1>
+            <p>マスを埋めてキーワードを導き出す、新しい感覚の検索可能クロスワードパズルサイトへようこそ！</p>
+            <div class="cta-buttons">
+                <a href="questions.html" class="btn btn-primary">問題を解く</a>
+                <a href="help.html" class="btn btn-secondary">検索可能クロスワードとは？</a>
+            </div>
+        </section>
+
+        <section class="features">
+            <div class="feature-card">
+                <h3>🔍 検索とヒントで遊ぶ</h3>
+                <p>分からない言葉があっても大丈夫。検索を活用しながら知識を広げて解き進めることができます。</p>
+            </div>
+            <div class="feature-card">
+                <h3>🎯 豊富な難易度</h3>
+                <p>初心者向けのエレメンタリーな問題から、上級者を悩ませる超難問まで、難易度やタグで絞り込んで楽しめます。</p>
+            </div>
+            <div class="feature-card">
+                <h3>✏️ 二重線マスから答えを導く</h3>
+                <p>クロスワードを解いたら、二重線で囲まれたマスの文字を並び替えて最終解答を導き出し、送信しましょう！</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- フッター -->
+    <footer>
+        <p>&copy; 検索可能クロスワード All Rights Reserved.</p>
+    </footer>
+
+    <!-- コナミコマンド検出用トースト通知 -->
+    <div id="secret-toast">管理者モードを検知！制作ページへ移動します...</div>
+
+    <!-- === JavaScript === -->
+    <script>
+        // === コナミコマンドの処理 (↑ ↑ ↓ ↓ ← → ← → B A) ===
+        const secretCode = [
+            'ArrowUp', 'ArrowUp', 
+            'ArrowDown', 'ArrowDown', 
+            'ArrowLeft', 'ArrowRight', 
+            'ArrowLeft', 'ArrowRight', 
+            'b', 'a'
+        ];
+        
+        let inputSequence = [];
+
+        document.addEventListener('keydown', (e) => {
+            // キー入力を取得 (英字は大文字小文字を許容するため toLowerCase)
+            const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+            
+            inputSequence.push(key);
+
+            // 保持する入力履歴をコマンドの長さに制限
+            if (inputSequence.length > secretCode.length) {
+                inputSequence.shift();
+            }
+
+            // 配列の内容がコマンドと一致しているか判定
+            const isMatch = secretCode.every((expectedKey, index) => {
+                return expectedKey.toLowerCase() === inputSequence[index];
+            });
+
+            if (isMatch) {
+                // 一致した場合の処理
+                const toast = document.getElementById('secret-toast');
+                toast.style.display = 'block';
+
+                // 少し遅延させてeditor.htmlへ移動
+                setTimeout(() => {
+                    window.location.href = 'editor.html';
+                }, 1200);
+
+                // 配列をリセット
+                inputSequence = [];
+            }
+        });
+    </script>
+</body>
+</html>
