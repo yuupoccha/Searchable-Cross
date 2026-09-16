@@ -3,105 +3,190 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ルール・遊び方 - クロスワード</title>
+    <title>遊び方・ルール - 検索可能クロスワード</title>
     <style>
         body {
-            font-family: sans-serif;
-            background-color: #f8f9fa;
-            color: #333;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f1f5f9;
+            color: #1e293b;
             margin: 0;
             padding: 0;
             line-height: 1.6;
         }
 
         header {
-            background-color: #fff;
-            border-bottom: 1px solid #ddd;
-            padding: 15px 20px;
+            padding: 20px;
             text-align: center;
+            background-color: #fff;
+            border-bottom: 1px solid #cbd5e1;
         }
 
-        header h1 {
-            margin: 0;
-            font-size: 20px;
+        .header-logo {
+            font-size: 22px;
+            font-weight: 800;
+            color: #0f172a;
+            text-decoration: none;
+            letter-spacing: 0.05em;
+            display: inline-block;
+            transition: opacity 0.2s ease;
+        }
+
+        .header-logo:hover {
+            opacity: 0.7;
         }
 
         main {
-            max-width: 900px;
-            margin: 20px auto 40px;
-            padding: 0 15px;
+            max-width: 1000px;
+            margin: 30px auto 60px;
+            padding: 0 20px;
         }
 
-        .box {
-            background: #fff;
-            border: 1px solid #ccc;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        h2 {
-            font-size: 16px;
+        .page-title {
+            text-align: center;
+            font-size: 20px;
+            font-weight: 700;
+            color: #0f172a;
             margin-top: 0;
-            margin-bottom: 12px;
-            padding-bottom: 5px;
-            border-bottom: 2px solid #333;
+            margin-bottom: 24px;
         }
 
-        .notice-text {
-            background-color: #fff4f4;
-            border-left: 4px solid #d9534f;
-            padding: 10px 12px;
-            margin: 8px 0;
-            font-size: 14px;
+        /* ルール解説セクション */
+        .rule-section {
+            background: #fff;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 30px;
+            border: 1px solid #cbd5e1;
         }
 
-        .rule-note {
-            background-color: #f5f5f5;
-            padding: 10px 12px;
-            margin-top: 8px;
-            font-size: 14px;
-        }
-
-        /* 上段レイアウト: ステップ1 / ステップ2 / カギ */
-        .top-row {
+        .section-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-top: 0;
+            margin-bottom: 16px;
             display: flex;
-            gap: 15px;
-            align-items: flex-start;
+            align-items: center;
+            gap: 8px;
         }
 
-        @media (max-width: 768px) {
-            .top-row {
-                flex-direction: column;
+        .section-title::before {
+            content: "";
+            display: inline-block;
+            width: 4px;
+            height: 18px;
+            background-color: #2563eb;
+            border-radius: 2px;
+        }
+
+        .rule-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .rule-list li {
+            margin-bottom: 16px;
+            font-size: 15px;
+        }
+
+        .search-warning-box {
+            background-color: #fef2f2;
+            border: 1px solid #fca5a5;
+            border-radius: 8px;
+            padding: 14px 18px;
+            margin-top: 8px;
+            color: #991b1b;
+            font-size: 14px;
+        }
+
+        .search-warning-box strong {
+            font-size: 15px;
+            display: block;
+            margin-bottom: 4px;
+            color: #7f1d1d;
+        }
+
+        .char-rule-box {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 12px 16px;
+            margin-top: 8px;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #334155;
+        }
+
+        /* チュートリアルレイアウト */
+        .tutorial-container {
+            background: #fff;
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid #cbd5e1;
+        }
+
+        /* 上段（STEP1, STEP2, カギ） */
+        .top-flow-grid {
+            display: grid;
+            grid-template-columns: auto auto 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        @media (max-width: 850px) {
+            .top-flow-grid {
+                grid-template-columns: 1fr;
             }
         }
 
-        .step-item {
-            background: #fdfdfd;
-            border: 1px solid #eee;
-            padding: 12px;
-            text-align: center;
+        .step-block {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        .step-title {
-            font-weight: bold;
-            font-size: 13px;
-            margin-bottom: 8px;
-            color: #555;
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            width: 100%;
         }
 
-        /* 盤面 */
+        .step-badge {
+            background-color: #0f172a;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+            letter-spacing: 0.05em;
+        }
+
+        .step-label {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        /* 盤面スタイル */
         .board {
             display: grid;
-            grid-template-columns: repeat(3, 40px);
+            grid-template-columns: repeat(3, 44px);
             gap: 2px;
-            background-color: #333;
-            border: 2px solid #333;
-            margin: 0 auto;
+            background-color: #1e293b;
+            border: 2px solid #1e293b;
+            padding: 2px;
+            border-radius: 4px;
         }
 
         .cell {
-            width: 40px;
-            height: 40px;
+            width: 44px;
+            height: 44px;
             background-color: #fff;
             position: relative;
             display: flex;
@@ -110,145 +195,189 @@
             box-sizing: border-box;
         }
 
-        .cell.black { background-color: #333; }
+        .cell.black { background-color: #1e293b; }
         .cell.double {
-            outline: 2px double #c90;
-            outline-offset: -3px;
-            background-color: #fffdf0;
+            outline: 3px double #d97706;
+            outline-offset: -4px;
+            background-color: #fffbeb;
         }
 
         .cell-num {
             position: absolute;
             top: 2px;
-            left: 2px;
+            left: 3px;
             font-size: 9px;
-            color: #666;
+            color: #64748b;
             line-height: 1;
         }
 
         .cell-char {
-            font-size: 16px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        /* 例題のカギブロック */
+        .hints-block {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 16px;
+            height: 100%;
+            box-sizing: border-box;
+        }
+
+        .hints-block-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 10px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #cbd5e1;
+        }
+
+        .hints-list-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .hint-group h5 {
+            margin: 0 0 6px 0;
+            font-size: 12px;
+            color: #2563eb;
+        }
+
+        .hint-group ul {
+            margin: 0;
+            padding-left: 16px;
+            font-size: 12px;
+            color: #334155;
+        }
+
+        .hint-group li {
+            margin-bottom: 4px;
+        }
+
+        /* 矢印表現 */
+        .flow-arrow {
+            text-align: center;
+            padding: 16px 0;
+            color: #94a3b8;
+            font-size: 20px;
             font-weight: bold;
         }
 
-        /* カギ情報 */
-        .hints-wrapper {
-            flex: 1;
-            background: #fdfdfd;
-            border: 1px solid #eee;
-            padding: 12px;
-            font-size: 13px;
-        }
-
-        .hints-wrapper h3 {
-            margin: 0 0 8px 0;
-            font-size: 14px;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 4px;
-        }
-
-        .hints-flex {
-            display: flex;
-            gap: 15px;
-        }
-
-        .hints-flex ul {
-            margin: 0;
-            padding-left: 18px;
-        }
-
-        .arrow {
-            text-align: center;
-            font-size: 18px;
-            margin: 15px 0;
-            color: #888;
-        }
-
-        /* 下段レイアウト: ステップ3 */
-        .bottom-row {
-            background: #fcfcfc;
-            border: 1px solid #ddd;
-            padding: 15px;
+        /* 下段（STEP3） */
+        .bottom-flow-area {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 10px;
+            padding: 20px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 30px;
+            justify-content: space-around;
+            gap: 20px;
             flex-wrap: wrap;
         }
 
-        .final-answer {
-            text-align: center;
-            border: 1px solid #333;
-            padding: 10px 20px;
+        .step3-board-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .answer-result-card {
             background: #fff;
-        }
-
-        .final-answer .label {
-            font-size: 12px;
-            color: #666;
-            display: block;
-        }
-
-        .final-answer .value {
-            font-size: 22px;
-            font-weight: bold;
-            letter-spacing: 2px;
-        }
-
-        /* 戻るボタン */
-        .footer-action {
+            border: 2px solid #2563eb;
+            border-radius: 10px;
+            padding: 16px 28px;
             text-align: center;
-            margin-top: 30px;
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.1);
         }
 
-        .btn-back {
+        .answer-result-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #2563eb;
+            letter-spacing: 0.05em;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .answer-result-value {
+            font-size: 26px;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: 0.15em;
+        }
+
+        /* 戻るボタンエリア */
+        .bottom-btn-area {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .back-btn {
             display: inline-block;
-            background-color: #333;
+            background-color: #0f172a;
             color: #fff;
             text-decoration: none;
-            padding: 10px 24px;
-            font-size: 14px;
-            border-radius: 3px;
+            font-weight: 700;
+            font-size: 15px;
+            padding: 12px 36px;
+            border-radius: 8px;
+            transition: background-color 0.2s ease, transform 0.1s ease;
         }
 
-        .btn-back:hover {
-            background-color: #555;
+        .back-btn:hover {
+            background-color: #2563eb;
+            transform: translateY(-1px);
         }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>ルール・遊び方</h1>
+        <a href="index.html" class="header-logo">検索可能クロスワード</a>
     </header>
 
     <main>
-        <!-- ルール -->
-        <div class="box">
-            <h2>基本ルール</h2>
-            <p style="margin-top: 0; font-size: 14px;">
-                一般的なクロスワードと同じように、タテ・ヨコのカギをヒントに盤面を埋めていきます。
-            </p>
+        <h2 class="page-title">遊び方・ルール</h2>
 
-            <div class="notice-text">
-                <strong>※ Web検索前提の問題です</strong><br>
-                盤面に入る単語のほとんどは一般常識ではなく、マイナーな用語や専門知識です。検索せずに解くことは想定されていませんので、Googleなどで積極的に調べて解答してください。
-            </div>
-
-            <div class="rule-note">
-                ・<strong>濁点・半濁点：</strong>区別します（「ハ」「バ」「パ」は別文字）。<br>
-                ・<strong>大文字・小文字：</strong>区別しません（「ツ」と「ッ」は同じ扱い）。
-            </div>
+        <!-- ルール概要 -->
+        <div class="rule-section">
+            <h2 class="section-title">基本ルール</h2>
+            <ul class="rule-list">
+                <li>
+                    <strong>検索をして解くことが前提のクロスワードです</strong>
+                    <div class="search-warning-box">
+                        一般的な知識ではない、マニアックな単語や専門用語ばかりが出題されます。検索やAIを活用して答えを探し出すことを前提としたクロスワードです。
+                    </div>
+                </li>
+                <li>
+                    <strong>表記・文字のルール</strong>
+                    <div class="char-rule-box">
+                        ・<strong>濁点・半濁点は明確に区別します</strong>（例：「ハ」「バ」「パ」はすべて別の文字扱い）。<br>
+                        ・<strong>大文字・小文字は区別しません</strong>（例：「ツ」と「ッ」、「ヤ」と「ャ」はどちらで打ち込んでも同一文字扱い）。
+                    </div>
+                    <strong>難易度は6段階に分かれます。難易度1は簡単な検索のみで答えにたどり着けますが、難易度が上がるにつれ高度な検索力・閃き・根気が要求されます。</strong>
+                </li>
+            </ul>
         </div>
 
-        <!-- 解答手順 -->
-        <div class="box">
-            <h2>流れ</h2>
+        <!-- チュートリアル -->
+        <div class="tutorial-container">
+            <h2 class="section-title">解答の流れ</h2>
 
-            <!-- 上段 -->
-            <div class="top-row">
-                <div class="step-item">
-                    <div class="step-title">ステップ1：空白の盤面</div>
+            <!-- 上段：STEP1 / STEP2 / 例題のカギ -->
+            <div class="top-flow-grid">
+                <!-- STEP 1 -->
+                <div class="step-block">
+                    <div class="step-header">
+                        <span class="step-badge">STEP 1</span>
+                        <span class="step-label">空白の盤面</span>
+                    </div>
                     <div class="board">
                         <div class="cell black"></div>
                         <div class="cell double"><span class="cell-num">1</span></div>
@@ -264,8 +393,12 @@
                     </div>
                 </div>
 
-                <div class="step-item">
-                    <div class="step-title">ステップ2：文字を埋める</div>
+                <!-- STEP 2 -->
+                <div class="step-block">
+                    <div class="step-header">
+                        <span class="step-badge">STEP 2</span>
+                        <span class="step-label">文字を埋める</span>
+                    </div>
                     <div class="board">
                         <div class="cell black"></div>
                         <div class="cell double"><span class="cell-num">1</span><span class="cell-char">ト</span></div>
@@ -281,42 +414,47 @@
                     </div>
                 </div>
 
-                <div class="hints-wrapper">
-                    <h3>例題のカギ</h3>
-                    <div class="hints-flex">
-                        <div>
-                            <strong>【ヨコ】</strong>
+                <!-- 例題のカギ -->
+                <div class="hints-block">
+                    <div class="hints-block-title">例題のカギ</div>
+                    <div class="hints-list-wrapper">
+                        <div class="hint-group">
+                            <h5>【ヨコ】</h5>
                             <ul>
-                                <li>1: 『ツギハギスタッカート』</li>
-                                <li>3: 小さな家、粗末な家</li>
-                                <li>4: 確認したり、問い返したり</li>
+                                <li><strong>1:</strong> 『ツギハギスタッカート』</li>
+                                <li><strong>3:</strong> 小さな家、粗末な家</li>
+                                <li><strong>4:</strong> 確認したり、問い返したり</li>
                             </ul>
                         </div>
-                        <div>
-                            <strong>【タテ】</strong>
+                        <div class="hint-group">
+                            <h5>【タテ】</h5>
                             <ul>
-                                <li>1: 広く世間に知れわたっている名</li>
-                                <li>2: イロカノ語で「王」</li>
-                                <li>3: 謀反のくわだて</li>
+                                <li><strong>1:</strong> 広く世間に知れわたっている名</li>
+                                <li><strong>2:</strong> イロカノ語で「王」</li>
+                                <li><strong>3:</strong> 謀反のくわだて</li>
                             </ul>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="arrow">↓</div>
+            <!-- 下矢印 -->
+            <div class="flow-arrow">↓</div>
 
-            <!-- 下段 -->
-            <div class="bottom-row">
-                <div style="text-align: center;">
-                    <div class="step-title">ステップ3：答えを抜き出す</div>
+            <!-- 下段：STEP3 -->
+            <div class="bottom-flow-area">
+                <div class="step3-board-wrap">
+                    <div class="step-header" style="justify-content: center; margin-bottom: 8px;">
+                        <span class="step-badge" style="background-color: #2563eb;">STEP 3</span>
+                        <span class="step-label">最終の答えを出す</span>
+                    </div>
                     <div class="board">
                         <div class="cell black"></div>
                         <div class="cell double"><span class="cell-num">1</span><span class="cell-char">ト</span></div>
                         <div class="cell double"><span class="cell-num">2</span><span class="cell-char">リ</span></div>
 
                         <div class="cell double"><span class="cell-num">3</span><span class="cell-char">ア</span></div>
-                        <div class="cell"><span class="cell-char" style="color: #ccc;">オ</span></div>
+                        <div class="cell"><span class="cell-char" style="opacity: 0.25;">オ</span></div>
                         <div class="cell double"><span class="cell-char">ナ</span></div>
 
                         <div class="cell double"><span class="cell-num">4</span><span class="cell-char">イ</span></div>
@@ -325,16 +463,16 @@
                     </div>
                 </div>
 
-                <div class="final-answer">
-                    <span class="label">二重線マスの答え</span>
-                    <span class="value">トリアナイト</span>
+                <div class="answer-result-card">
+                    <span class="answer-result-label">二重線マスの文字を並べる</span>
+                    <span class="answer-result-value">トリアナイト</span>
                 </div>
             </div>
         </div>
 
         <!-- トップに戻るボタン -->
-        <div class="footer-action">
-            <a href="index.html" class="btn-back">トップページに戻る</a>
+        <div class="bottom-btn-area">
+            <a href="index.html" class="back-btn">トップページへ戻る</a>
         </div>
     </main>
 
