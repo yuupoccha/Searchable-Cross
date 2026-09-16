@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>問題一覧 - 検索可能クロスワード</title>
+    <style>
+        body {
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            background-color: #fcfcfc;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        header {
+            padding: 15px 20px;
+            text-align: center;
+            border-bottom: 2px solid #eee;
+            background-color: #fff;
+        }
+
+        header a {
+            text-decoration: none;
+            color: #444;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        main {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        h2 {
+            font-size: 22px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* フィルター & ソートコントロール */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #eee;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        select {
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+            background-color: #fff;
+        }
+
+        /* 問題カードグリッド */
+        .questions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 15px;
+        }
+
+        .question-card {
+            background-color: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 18px;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .question-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2d3748;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .badge-diff {
+            font-size: 12px;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-weight: bold;
+        }
+        .diff-1 { background-color: #d1fae5; color: #065f46; } /* 初級 */
+        .diff-2 { background-color: #fef3c7; color: #92400e; } /* 中級 */
+        .diff-3 { background-color: #fee2e2; color: #991b1b; } /* 上級 */
+
+        .badge-clear {
+            font-size: 11px;
+            background-color: #3b82f6;
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        /* モーダル (ポップアウト表示) */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+
+        .modal-content {
+            background: #fff;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 680px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 24px;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        /* ゲームレイアウト */
+        .game-layout {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .board-container {
+            flex: 1;
+            min-width: 220px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .crossword-board {
+            display: grid;
+            gap: 2px;
+            background-color: #333;
+            border: 2px solid #333;
+            padding: 2px;
+            border-radius: 4px;
+        }
+
+        .cell {
+            width: 50px;
+            height: 50px;
+            background-color: #fff;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .cell.black {
+            background-color: #333;
+        }
+
+        /* 二重線マスの装飾 */
+        .cell.double {
+            outline: 3px double #d97706;
+            outline-offset: -4px;
+            background-color: #fffbeb;
+        }
+
+        .cell-num {
+            position: absolute;
+            top: 2px;
+            left: 3px;
+            font-size: 10px;
+            color: #666;
+            line-height: 1;
+            pointer-events: none;
+        }
+
+        .cell input {
+            width: 100%;
+            height: 100%;
+            border: none;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            background: transparent;
+            outline: none;
+            text-transform: uppercase;
+        }
+
+        .hints-container {
+            flex: 1;
+            min-width: 220px;
+            font-size: 14px;
+        }
+
+        .hint-group {
+            margin-bottom: 15px;
+        }
+
+        .hint-title {
+            font-weight: bold;
+            color: #444;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 3px;
+            margin-bottom: 6px;
+        }
+
+        .hint-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .hint-list li {
+            margin-bottom: 4px;
+            color: #555;
+        }
+
+        /* 最終解答エリア */
+        .answer-section {
+            background-color: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            text-align: center;
+        }
+
+        .answer-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #475569;
+        }
+
+        .answer-form {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .answer-input {
+            padding: 8px 12px;
+            font-size: 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            width: 180px;
+            text-align: center;
+        }
+
+        .btn-submit {
+            background-color: #333;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-submit:hover {
+            background-color: #555;
+        }
+
+        /* 結果判定メッセージ */
+        .result-msg {
+            font-weight: bold;
+            margin-top: 10px;
+            font-size: 15px;
+        }
+
+        .result-success {
+            color: #16a34a;
+        }
+
+        .result-error {
+            color: #dc2626;
+        }
+
+        /* X(Twitter)ポストボタン */
+        .x-post-btn {
+            display: inline-block;
+            background-color: #000;
+            color: #fff;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            margin-top: 12px;
+        }
+
+        .x-post-btn:hover {
+            background-color: #333;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html">検索可能クロスワード</a>
+    </header>
+
+    <main>
+        <h2>問題一覧</h2>
+
+        <!-- 絞り込み & 並び替え -->
+        <div class="controls">
+            <div class="control-group">
+                <label for="filter-diff">難易度:</label>
+                <select id="filter-diff">
+                    <option value="all">すべて</option>
+                    <option value="初級">初級</option>
+                    <option value="中級">中級</option>
+                    <option value="上級">上級</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="filter-status">状態:</label>
+                <select id="filter-status">
+                    <option value="all">すべて</option>
+                    <option value="cleared">クリア済み</option>
+                    <option value="uncleared">未クリア</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="sort-order">並び替え:</label>
+                <select id="sort-order">
+                    <option value="id-asc">標準</option>
+                    <option value="diff-asc">難易度（低い順）</option>
+                    <option value="diff-desc">難易度（高い順）</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 問題一覧カード表示枠 -->
+        <div id="questions-grid" class="questions-grid"></div>
+    </main>
+
+    <!-- モーダル（問題ポップアウト） -->
+    <div id="game-modal" class="modal-backdrop">
+        <div class="modal-content">
+            <button class="modal-close" id="modal-close">&times;</button>
+            <h3 id="modal-title" class="modal-title"></h3>
+
+            <div class="game-layout">
+                <!-- 左上：盤面 -->
+                <div class="board-container">
+                    <div id="crossword-board" class="crossword-board"></div>
+                </div>
+
+                <!-- 右上：カギ -->
+                <div class="hints-container">
+                    <div class="hint-group">
+                        <div class="hint-title">タテのカギ</div>
+                        <ul id="hints-down" class="hint-list"></ul>
+                    </div>
+                    <div class="hint-group">
+                        <div class="hint-title">ヨコのカギ</div>
+                        <ul id="hints-across" class="hint-list"></ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 下：解答欄 -->
+            <div class="answer-section">
+                <div class="answer-title">二重線マスの文字を並び替えてできる言葉を入力してください</div>
+                <div class="answer-form">
+                    <input type="text" id="answer-input" class="answer-input" placeholder="答えを入力" autocomplete="off">
+                    <button id="answer-submit" class="btn-submit">送信</button>
+                </div>
+                <div id="result-area"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === 問題データ（3問） ===
+        const questionsData = [
+            {
+                id: "q1",
+                title: "はじめてのクロス",
+                difficulty: "初級",
+                diffLevel: 1,
+                rows: 3,
+                cols: 3,
+                // grid: 'black'=黒マス, num=カギ番号, double=二重線マス
+                grid: [
+                    [{ type: 'letter', num: 1, double: true }, { type: 'letter' }, { type: 'black' }],
+                    [{ type: 'letter' }, { type: 'black' }, { type: 'letter', num: 2 }],
+                    [{ type: 'letter', num: 3 }, { type: 'letter', double: true }, { type: 'letter' }]
+                ],
+                hints: {
+                    across: [
+                        { num: 1, text: "空から降ってくる水滴" },
+                        { num: 3, text: "夜空に浮かぶ丸い天体" }
+                    ],
+                    down: [
+                        { num: 1, text: "「あの人」を少しぞんざいに言う言葉" },
+                        { num: 2, text: "青く広がる地球を包む空間" }
+                    ]
+                },
+                finalAnswer: "アキ" // 二重線マス「ア」「キ」の並び替え
+            },
+            {
+                id: "q2",
+                title: "日常のことば",
+                difficulty: "中級",
+                diffLevel: 2,
+                rows: 3,
+                cols: 3,
+                grid: [
+                    [{ type: 'letter', num: 1, double: true }, { type: 'letter' }, { type: 'letter', num: 2 }],
+                    [{ type: 'letter' }, { type: 'black' }, { type: 'letter' }],
+                    [{ type: 'letter', num: 3 }, { type: 'letter', double: true }, { type: 'letter' }]
+                ],
+                hints: {
+                    across: [
+                        { num: 1, text: "写真を撮影する機械" },
+                        { num: 3, text: "とりあえず。仮に（〜受けておく）" }
+                    ],
+                    down: [
+                        { num: 1, text: "税金を課すこと" },
+                        { num: 2, text: "音声放送を聞くための機器" }
+                    ]
+                },
+                finalAnswer: "カチ" // 二重線マス「カ」「チ」の並び替え
+            },
+            {
+                id: "q3",
+                title: "検索の達人",
+                difficulty: "上級",
+                diffLevel: 3,
+                rows: 4,
+                cols: 4,
+                grid: [
+                    [{ type: 'letter', num: 1, double: true }, { type: 'letter' }, { type: 'letter', num: 2 }, { type: 'letter' }],
+                    [{ type: 'letter' }, { type: 'black' }, { type: 'letter' }, { type: 'black' }],
+                    [{ type: 'letter', num: 3 }, { type: 'letter' }, { type: 'letter', double: true }, { type: 'letter' }],
+                    [{ type: 'letter' }, { type: 'black' }, { type: 'letter' }, { type: 'black' }]
+                ],
+                hints: {
+                    across: [
+                        { num: 1, text: "Googleなどで情報を調べること" },
+                        { num: 3, text: "物事の心構えや、知っておくべき知識" }
+                    ],
+                    down: [
+                        { num: 1, text: "申し分ないさま。かなり良い" },
+                        { num: 2, text: "建築物に自然光を取り入れること" }
+                    ]
+                },
+                finalAnswer: "ロケ" // 二重線マス「ケ」「ロ」の並び替え
+            }
+        ];
+
+        let currentQuestion = null;
+
+        // === localStorage の読み書き ===
+        function isCleared(id) {
+            return localStorage.getItem('crossword_cleared_' + id) === 'true';
+        }
+
+        function setCleared(id) {
+            localStorage.setItem('crossword_cleared_' + id, 'true');
+        }
+
+        // ひらがなをカタカナに変換する標準化関数
+        function toKatakana(str) {
+            return str.replace(/[\u3041-\u3096]/g, ch => String.fromCharCode(ch.charCodeAt(0) + 0x60));
+        }
+
+        // === 一覧の描画・フィルタ・ソート ===
+        function renderQuestionList() {
+            const gridEl = document.getElementById('questions-grid');
+            const filterDiff = document.getElementById('filter-diff').value;
+            const filterStatus = document.getElementById('filter-status').value;
+            const sortOrder = document.getElementById('sort-order').value;
+
+            let filtered = [...questionsData];
+
+            // 難易度フィルター
+            if (filterDiff !== 'all') {
+                filtered = filtered.filter(q => q.difficulty === filterDiff);
+            }
+
+            // 状態フィルター
+            if (filterStatus === 'cleared') {
+                filtered = filtered.filter(q => isCleared(q.id));
+            } else if (filterStatus === 'uncleared') {
+                filtered = filtered.filter(q => !isCleared(q.id));
+            }
+
+            // ソート
+            if (sortOrder === 'diff-asc') {
+                filtered.sort((a, b) => a.diffLevel - b.diffLevel);
+            } else if (sortOrder === 'diff-desc') {
+                filtered.sort((a, b) => b.diffLevel - a.diffLevel);
+            }
+
+            gridEl.innerHTML = '';
+
+            filtered.forEach(q => {
+                const cleared = isCleared(q.id);
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.onclick = () => openGameModal(q);
+
+                card.innerHTML = `
+                    <div class="card-title">${q.title}</div>
+                    <div class="card-footer">
+                        <span class="badge-diff diff-${q.diffLevel}">${q.difficulty}</span>
+                        ${cleared ? '<span class="badge-clear">CLEAR!</span>' : ''}
+                    </div>
+                `;
+                gridEl.appendChild(card);
+            });
+        }
+
+        // === モーダル（ゲーム画面）の開閉と生成 ===
+        function openGameModal(question) {
+            currentQuestion = question;
+            document.getElementById('modal-title').textContent = question.title;
+            document.getElementById('answer-input').value = '';
+            document.getElementById('result-area').innerHTML = '';
+
+            // 盤面の描画
+            const boardEl = document.getElementById('crossword-board');
+            boardEl.style.gridTemplateColumns = `repeat(${question.cols}, 1fr)`;
+            boardEl.innerHTML = '';
+
+            question.grid.forEach(row => {
+                row.forEach(cellData => {
+                    const cellEl = document.createElement('div');
+                    cellEl.className = 'cell';
+
+                    if (cellData.type === 'black') {
+                        cellEl.classList.add('black');
+                    } else {
+                        if (cellData.double) cellEl.classList.add('double');
+
+                        if (cellData.num) {
+                            const numEl = document.createElement('span');
+                            numEl.className = 'cell-num';
+                            numEl.textContent = cellData.num;
+                            cellEl.appendChild(numEl);
+                        }
+
+                        const inputEl = document.createElement('input');
+                        inputEl.type = 'text';
+                        inputEl.maxLength = 1;
+                        cellEl.appendChild(inputEl);
+                    }
+                    boardEl.appendChild(cellEl);
+                });
+            });
+
+            // カギの描画
+            const renderHints = (listId, hints) => {
+                const el = document.getElementById(listId);
+                el.innerHTML = '';
+                hints.forEach(h => {
+                    const li = document.createElement('li');
+                    li.textContent = `${h.num}. ${h.text}`;
+                    el.appendChild(li);
+                });
+            };
+
+            renderHints('hints-down', question.hints.down);
+            renderHints('hints-across', question.hints.across);
+
+            // すでにクリア済みの場合メッセージ表示
+            if (isCleared(question.id)) {
+                showSuccessResult(false);
+            }
+
+            document.getElementById('game-modal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('game-modal').style.display = 'none';
+            renderQuestionList(); // クリア状態の更新を一覧に反映
+        }
+
+        // === 正解判定処理 ===
+        function checkAnswer() {
+            if (!currentQuestion) return;
+
+            const userAns = toKatakana(document.getElementById('answer-input').value.trim());
+            const targetAns = toKatakana(currentQuestion.finalAnswer);
+
+            if (userAns === targetAns) {
+                setCleared(currentQuestion.id);
+                showSuccessResult(true);
+            } else {
+                const resultArea = document.getElementById('result-area');
+                resultArea.innerHTML = `<div class="result-msg result-error">不正解です。もう一度考えてみよう！</div>`;
+            }
+        }
+
+        function showSuccessResult(isNewClear) {
+            const resultArea = document.getElementById('result-area');
+            const shareText = encodeURIComponent(`「${currentQuestion.title}」のクロスワードを解き明かした！ #検索可能クロスワード`);
+            const shareUrl = encodeURIComponent(window.location.href);
+            const xIntentUrl = `https://x.com/intent/tweet?text=${shareText}&url=${shareUrl}`;
+
+            resultArea.innerHTML = `
+                <div class="result-msg result-success">🎉 正解！おめでとうございます！</div>
+                <a href="${xIntentUrl}" target="_blank" rel="noopener noreferrer" class="x-post-btn">
+                    X にポストする
+                </a>
+            `;
+        }
+
+        // === イベントリスナー設定 ===
+        document.getElementById('filter-diff').addEventListener('change', renderQuestionList);
+        document.getElementById('filter-status').addEventListener('change', renderQuestionList);
+        document.getElementById('sort-order').addEventListener('change', renderQuestionList);
+
+        document.getElementById('modal-close').addEventListener('click', closeModal);
+        document.getElementById('answer-submit').addEventListener('click', checkAnswer);
+        document.getElementById('answer-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') checkAnswer();
+        });
+
+        // モーダルの外側クリックで閉じる
+        document.getElementById('game-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'game-modal') closeModal();
+        });
+
+        // 初期表示
+        renderQuestionList();
+    </script>
+</body>
+</html>
